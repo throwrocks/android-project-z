@@ -1,5 +1,11 @@
 package athrow.rocks.android_project_z;
 
+import android.content.ContentValues;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -7,6 +13,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import athrow.rocks.android_project_z.data.API;
+import athrow.rocks.android_project_z.data.JSONParser;
+import athrow.rocks.android_project_z.data.ProjectRequest;
 
 import static org.junit.Assert.*;
 
@@ -17,11 +25,65 @@ import static org.junit.Assert.*;
 @RunWith(RobolectricTestRunner.class)
 public class UnitTests extends Robolectric {
     String mBuildAPIKey = BuildConfig.UDACITY_REVIEWER_API_KEY;
+    String mCertificationsJSON;
+
+    @Before
+    public void setUp() throws Exception {
+        if (mCertificationsJSON == null) {
+            mCertificationsJSON = API.getCertifications(mBuildAPIKey);
+        }
+
+    }
 
     @Test
-    public void testAPIGetCertifications() throws Exception{
-        String result = API.callCertificationsAPI(mBuildAPIKey);
-        assertTrue(result != null);
+    public void testGetCertifications() throws Exception {
+        assertTrue(mCertificationsJSON != null);
+    }
+
+    @Test
+    public void testParsingCertifications() {
+        ContentValues[] parsedResults = JSONParser.parseCertifications(mCertificationsJSON);
+        assertTrue(parsedResults != null);
+        assertTrue(parsedResults[0].size() == 25);
+    }
+
+
+    @Test
+    public void testSubmissionRequest() throws Exception{
+        // Check if there's an open request
+        String request  = API.getSubmissionRequest(mBuildAPIKey);
+        JSONArray requestArray = new JSONArray(request);
+        // If there isn't create a new request
+        if ( requestArray.length() == 0){
+            API.createSubmissionRequest(mBuildAPIKey, "");
+            API.getSubmissionRequest(mBuildAPIKey);
+        }
+        // Get the project id from the new request
+        JSONArray jsonArray = new JSONArray(request);
+        try{
+            JSONObject object = jsonArray.getJSONObject(0);
+            int id = object.getInt("id");
+            // Delete the request
+            String deleteResults = API.deleteSubmissionRequest(mBuildAPIKey, id);
+        }
+        catch (JSONException jsonException){
+            jsonException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testBuildProjectRequest() throws Exception{
+        ProjectRequest request = new ProjectRequest(100, "en-us");
+        String requestString = request.toString();
+        try {
+            JSONObject requestObject = new JSONObject(requestString);
+            int requestProjectId = requestObject.getInt("project_id");
+            String requestLanguage = requestObject.getString("language");
+            assertTrue(requestProjectId == 100 && requestLanguage.equals("en-us"));
+        } catch (JSONException jsonException) {
+            jsonException.printStackTrace();
+            assertTrue(false);
+        }
     }
 
 }
