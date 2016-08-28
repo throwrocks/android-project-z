@@ -22,6 +22,10 @@ public class RealmSubmissionRequest {
     // ContentValues: project_id, language
     ContentValues[] submission_request_projects;
 
+    public RealmSubmissionRequest(){
+
+    }
+
     public RealmSubmissionRequest(int id, int user_id, String status, Date closed_at,
                                   Date created_at, int submission_id, Date updated_at,
                                   ContentValues[] submission_request_projects) {

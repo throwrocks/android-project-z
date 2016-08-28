@@ -28,48 +28,9 @@ public final class API {
         throw new AssertionError("No API instances for you!");
     }
 
-    private static final String MODULE_REVIEWS = "submissions_completed";
-    private static final String MODULE_FEEDBACKS = "student_feedbacks";
-    private static final String REVIEWS_API_URL = "https://review-api.udacity.com/api/v1/me/submissions/completed";
-    private static final String FEEDBACKS_API_URL = "https://review-api.udacity.com/api/v1/me/student_feedbacks";
 
-    /**
-     * callAPI
-     *
-     * @param params a ContentValues object containing the parameters
-     * @return the API response in a string
-     */
-    public static String callAPI(String APIKey, ContentValues params) {
-        String APIUrl;
-        String module = params.getAsString("module");
-        switch (module) {
-            case MODULE_REVIEWS:
-                APIUrl = REVIEWS_API_URL;
-                break;
-            case MODULE_FEEDBACKS:
-                APIUrl = FEEDBACKS_API_URL;
-                break;
-            default:
-                return "error: empty module argument";
-        }
-        ArrayList<String> paramsArray = new ArrayList<>();
-        String dateStart = params.getAsString("date_start");
-        String dateEnd = params.getAsString("date_end");
-        boolean hasParams = false;
-        if (!dateStart.equals("")) {
-            paramsArray.add("start_date=" + dateStart);
-            hasParams = true;
-        }
-        if (!dateEnd.equals("")) {
-            paramsArray.add("end_date=" + dateEnd);
-            hasParams = true;
-        }
-        if (hasParams) {
-            String UrlParams = Utilities.buildStringFromArray(paramsArray, "&");
-            if (UrlParams != null) {
-                APIUrl = APIUrl + "?" + UrlParams;
-            }
-        }
+    public static String callCertificationsAPI(String APIKey){
+        String APIUrl = "https://review-api.udacity.com/api/v1/me/certifications";
         return httpConnect(APIKey, APIUrl);
     }
 
@@ -98,20 +59,14 @@ public final class API {
             InputStream inputStream = urlConnection.getInputStream();
             StringBuilder buffer = new StringBuilder();
             if (inputStream == null) {
-                // Nothing to do.
-                results = null;
                 return null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             while ((line = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging ->  + "\n"
                 buffer.append(line);
             }
             if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
                 results = null;
             }
             results = buffer.toString();

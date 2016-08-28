@@ -22,10 +22,10 @@ public class RealmCertification extends RealmObject {
     int trainings_count;
     Boolean active;
     String notes;
-    String[] project_languages_to_recruit;
+    String project_languages_to_recruit;
     String project_name;
-    Number project_price;
-    Number project_udacity_key;
+    double project_price;
+    int project_udacity_key;
     Date project_created_at;
     Date project_updated_at;
     String project_description;
@@ -38,11 +38,15 @@ public class RealmCertification extends RealmObject {
     Boolean project_nomination_eligible;
     String project_hashtag;
 
+    public RealmCertification(){
+
+    }
+
     public RealmCertification(int id, String status, int project_id, int grader_id,
                                Date created_at, Date updated_at, Date waitlisted_at,
                                Date certified_at, int trainings_count, Boolean active,
-                               String notes, String[] project_languages_to_recruit,
-                               String project_name, Number project_price, Number project_udacity_key,
+                               String notes, String project_languages_to_recruit,
+                               String project_name, double project_price, int project_udacity_key,
                                Date project_created_at, Date project_updated_at,
                                String project_description, String project_required_skills,
                                Boolean private_visible, int project_awaiting_review_count,
