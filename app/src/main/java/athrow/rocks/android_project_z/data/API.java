@@ -30,7 +30,7 @@ public final class API {
      * @param APIKey the API key
      * @return a string of JSON formatted results
      */
-    public static String getCertifications(String APIKey){
+    public static APIResponse getCertifications(String APIKey){
         String APIUrl = "https://review-api.udacity.com/api/v1/me/certifications";
         return httpConnect(APIKey, APIUrl, "GET", "");
     }
@@ -41,7 +41,7 @@ public final class API {
      * @param APIKey the API key
      * @return a string of JSON formatted results
      */
-    public static String getSubmissionRequest(String APIKey){
+    public static APIResponse getSubmissionRequest(String APIKey){
         String APIUrl = "https://review-api.udacity.com/api/v1/me/submission_requests";
         return httpConnect(APIKey, APIUrl, "GET", "");
     }
@@ -52,9 +52,9 @@ public final class API {
      * @param requestedProjects a JSON string of requested projects
      * @return a string of JSON formatted results
      */
-    public static String createSubmissionRequest(String APIKey, String requestedProjects){
+    public static APIResponse createSubmissionRequest(String APIKey, String requestedProjects){
         String APIUrl = "https://review-api.udacity.com/api/v1/submission_requests";
-        return httpConnect(APIKey, APIUrl, "POST", "");
+        return httpConnect(APIKey, APIUrl, "POST", requestedProjects);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class API {
      * @param requestId the id of the submission request to delete
      * @return a string of JSON formatted results
      */
-    public static String deleteSubmissionRequest(String APIKey, int requestId){
+    public static APIResponse deleteSubmissionRequest(String APIKey, int requestId){
         String APIUrl = "https://review-api.udacity.com/api/v1/submission_requests/" + requestId;
         return httpConnect(APIKey, APIUrl, "DELETE", "");
     }
@@ -77,8 +77,8 @@ public final class API {
      * @param requestBody the request's body (optional)
      * @return a json string to be used in a parsing method
      */
-    private static String httpConnect(String apiKey, String apiUrl, String requestMethod, String requestBody) {
-        String results = null;
+    private static APIResponse httpConnect(String apiKey, String apiUrl, String requestMethod, String requestBody) {
+        APIResponse apiResponse = new APIResponse();
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         try {
@@ -89,15 +89,17 @@ public final class API {
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod(requestMethod);
             urlConnection.addRequestProperty("Authorization", apiKey);
-            urlConnection.addRequestProperty("Content-Length", "0");
+            //urlConnection.addRequestProperty("Content-Length", "0");
             urlConnection.addRequestProperty("Body", requestBody);
+            urlConnection.addRequestProperty("Content-Type", "application/json");
             urlConnection.addRequestProperty("Accept", "application/json");
             urlConnection.connect();
+            apiResponse.setResponseCode(urlConnection.getResponseCode());
             // Read the input stream into a String
             InputStream inputStream = urlConnection.getInputStream();
             StringBuilder buffer = new StringBuilder();
             if (inputStream == null) {
-                return "error: inputStream == null";
+                return apiResponse;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
@@ -105,11 +107,12 @@ public final class API {
                 buffer.append(line);
             }
             if (buffer.length() == 0) {
-                results = "error: buffer.length() == 0";
+                return apiResponse;
             }
-            results = buffer.toString();
+            apiResponse.setResponseText(buffer.toString());
         } catch (IOException v) {
-            results = "error: IOException " + v;
+            apiResponse.setResponseText( "error: IOException " + v);
+            return apiResponse;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -122,6 +125,6 @@ public final class API {
                 }
             }
         }
-        return results;
+        return apiResponse;
     }
 }

@@ -13,6 +13,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import athrow.rocks.android_project_z.data.API;
+import athrow.rocks.android_project_z.data.APIResponse;
 import athrow.rocks.android_project_z.data.JSONParser;
 import athrow.rocks.android_project_z.data.ProjectRequest;
 
@@ -25,12 +26,13 @@ import static org.junit.Assert.*;
 @RunWith(RobolectricTestRunner.class)
 public class UnitTests extends Robolectric {
     String mBuildAPIKey = BuildConfig.UDACITY_REVIEWER_API_KEY;
+    APIResponse apiResponse;
     String mCertificationsJSON;
 
     @Before
     public void setUp() throws Exception {
         if (mCertificationsJSON == null) {
-            mCertificationsJSON = API.getCertifications(mBuildAPIKey);
+            mCertificationsJSON = API.getCertifications(mBuildAPIKey).getResponseText();
         }
 
     }
@@ -51,30 +53,32 @@ public class UnitTests extends Robolectric {
     @Test
     public void testSubmissionRequest() throws Exception{
         // Check if there's an open request
-        String request  = API.getSubmissionRequest(mBuildAPIKey);
-        JSONArray requestArray = new JSONArray(request);
+        //String request  = API.getSubmissionRequest(mBuildAPIKey);
+        //JSONArray requestArray = new JSONArray(request);
         // If there isn't create a new request
-        if ( requestArray.length() == 0){
-            API.createSubmissionRequest(mBuildAPIKey, "");
+        //if ( requestArray.length() == 0){
+            String requestString = "{\"projects\": [{\"project_id\": 159,\"language\": \"en-us\"}]}";
+            String x = API.createSubmissionRequest(mBuildAPIKey, requestString).getResponseText();
             API.getSubmissionRequest(mBuildAPIKey);
-        }
+        //}
         // Get the project id from the new request
-        JSONArray jsonArray = new JSONArray(request);
-        try{
-            JSONObject object = jsonArray.getJSONObject(0);
-            int id = object.getInt("id");
+        //JSONArray jsonArray = new JSONArray(request);
+        //try{
+            //JSONObject object = jsonArray.getJSONObject(0);
+            //int id = object.getInt("id");
             // Delete the request
-            String deleteResults = API.deleteSubmissionRequest(mBuildAPIKey, id);
-        }
-        catch (JSONException jsonException){
-            jsonException.printStackTrace();
-        }
+            //String deleteResults = API.deleteSubmissionRequest(mBuildAPIKey, id);
+        //}
+        //catch (JSONException jsonException){
+           // jsonException.printStackTrace();
+        //}
     }
 
     @Test
     public void testBuildProjectRequest() throws Exception{
-        ProjectRequest request = new ProjectRequest(100, "en-us");
-        String requestString = request.toString();
+        //ProjectRequest request = new ProjectRequest(100, "en-us");
+        String requestString = "'projects': [{'project_id': 159, 'language': 'en'}]";
+        //request.toString();
         try {
             JSONObject requestObject = new JSONObject(requestString);
             int requestProjectId = requestObject.getInt("project_id");
